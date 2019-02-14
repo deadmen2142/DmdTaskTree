@@ -1,0 +1,62 @@
+﻿@model TaskNote
+
+@{
+    ViewData["Title"] = "Update";
+}
+
+<p class="text">Fill the form to update the task</p>
+<form name="updateForm" method="post" action="~/Home/Update">
+    <input type="hidden" name="Id" value="@Model.Id"/>
+    <table>
+        <tr>
+            <td class="text">Task name:</td>
+            <td><input type="text" name="Name" value="@Model.Name" required /> </td>
+        </tr>
+        <tr>
+            <td class="text">Description:</td>
+            <td><input type="text" name="Description" value="@Model.Description" /></td>
+        </tr>
+        <tr>
+            <td class="text">Performers:</td>
+            <td><input type="text" name="Performers" value="@Model.Performers" /></td>
+        </tr>
+        <tr>
+            @{ 
+                var finishDate = (Model.CreationDate + TimeSpan.FromTicks(Model.PlanedExecutionTime)).ToString("yyyy-MM-dd HH:mm:ss").Replace(' ', 'T');
+            }
+            <td class="text">Planed finish date:</td>
+            <td><input type="datetime-local" name="PlanedFinishDate" value="@finishDate" required /></td>
+        </tr>
+        <tr>
+            <td class="text">Status:</td>
+            <td>
+                <select name="Status" required>
+                    <option value="@Model.Status.ToString()" selected>"@Model.Status.ToString()"</option>
+                    @if (Model.Status == Statuses.ToDo)
+                    {
+                        <option value="InProgress">InProgress</option>
+                    }
+                    @if (Model.Status == Statuses.InProgress)
+                    {
+                        <option value="ToDo">ToDo</option>
+                        <option value="Pause">Pause</option>
+                        <option value="Done">Done</option>
+                    }
+                    @if (Model.Status == Statuses.Pause)
+                    {
+                        <option value="InProgress">InProgress</option>
+                    }
+                    @if (Model.Status == Statuses.Done)
+                    {
+                        <option value="ToDo">ToDo</option>
+                        <option value="InProgress">InProgress</option>
+                    }
+                </select>
+            </td>
+        </tr>
+        <tr><td><input type="submit" value="[Submit]" class="button addbutton"/> </td><td></td></tr>
+    </table>
+</form>
+
+
+

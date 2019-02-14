@@ -1,0 +1,28 @@
+﻿@model TaskModelOutput
+
+<p class="text">Name: @Model.Name</p>
+<p class="text">Desription: @Model.Description</p>
+<p class="text">Performers: @Model.Performers</p>
+<p class="text">Status: @Model.Status.ToString()</p>
+<p class="text">Creation date: @Model.CreationDate</p>
+
+
+@if (Model.FinishDate != "")
+{
+    <p class="text">Finish date: @Model.FinishDate</p>
+}
+
+@if (Model.CalculatedPlanedExecutionTime != "")
+{
+    <p class="text">Planed execution time (include subtasks): @Model.CalculatedPlanedExecutionTime</p>
+}
+
+@if (Model.ExecutionTime != "")
+{
+    <p class="text">Execution time: @Model.ExecutionTime</p>
+}
+
+@if (Model.SubtaskExecutionTime != "")
+{
+    <p class="text">Subtask execution time: @Model.SubtaskExecutionTime</p>
+}

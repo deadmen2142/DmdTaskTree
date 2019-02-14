@@ -1,0 +1,27 @@
+﻿@model TaskModelPreview
+
+@if (Model.Descendats != null)
+{
+    <ul>
+        @foreach (var task in Model.Descendats)
+        {
+        <li>
+            <span>
+                <button class="tasknote" value="@task.Id" onclick="show('@task.Id')">@task.Id:@task.Name</button>
+            </span>
+            @if (task.Status != Statuses.Done)
+            {
+                <span><a href="~/Home/Create/@task.Id" class="subtask">[A]</a></span>
+            }
+            <span><a href="~/Home/Update/@task.Id" class="update">[U]</a></span>
+
+            @if (task.Descendats == null)
+            {
+                <span><a href="~/Home/Remove/@task.Id" class="remove">[R]</a></span>
+            }
+
+        </li>
+            @await Html.PartialAsync("_TreeList", task);
+        }
+    </ul>
+}

@@ -1,0 +1,111 @@
+﻿@task-container-width: 60%;
+@body-background: #EEEEEB;
+@main-font-family: Courier New, Courier, monospace;
+@button-color: #0000E6;
+
+.position {
+    padding-left: 1%;
+    padding-top: 1%;
+}
+
+.text
+{
+    font-family: @main-font-family;
+}
+
+.errortext
+{
+    .text;
+    color:red;
+}
+
+body {
+    background: @body-background;
+    margin: 0;
+}
+
+aside.left {
+    float: left;
+    width: @task-container-width;
+}
+
+aside.right {
+    float: right;
+    width: 100% - @task-container-width;
+}
+
+ul.root {
+    margin-left: 0;
+}
+
+li {
+    list-style-type: none;
+}
+
+.button {
+    font-family: @main-font-family;
+    text-decoration: none;
+    padding: 0;
+    transition: 0.2s;
+}
+
+.hover {
+    color: @body-background;
+    background: black;
+}
+
+a.subtask {
+    .button;
+    color: @button-color;
+    background-color: @body-background;
+}
+
+a.subtask:hover {
+    .hover;
+}
+
+a.update {
+    .button;
+    color: @button-color;
+    background-color: @body-background;
+}
+
+a.update:hover {
+    .hover;
+}
+
+a.remove {
+    .button;
+    color: @button-color;
+    background-color: @body-background;
+}
+
+a.remove:hover {
+    .hover;
+}
+
+button.tasknote {
+    color: black;
+    background-color: @body-background;
+    font-family: @main-font-family;
+    border: 0;
+    padding: 0;
+    transition: 0.2s;
+}
+
+button.tasknote:hover {
+    .hover;
+}
+
+.addbutton {
+    font-family: @main-font-family;
+    .button;
+    border: none;
+    outline: none;
+    color: @button-color;
+    background-color: @body-background;
+}
+
+.addbutton:hover {
+    .hover;
+}

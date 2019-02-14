@@ -1,0 +1,14 @@
+﻿@model string
+@{
+    ViewData["Title"] = "Error";
+}
+
+<h1 class="text-danger errortext">Error.</h1>
+<h2 class="text-danger text">An error occurred while processing your request.</h2>
+
+
+    <p>
+        <strong class="errortext">[@Model]</strong>
+    </p>
+
+<a href="~/Home/Index" class="button addbutton">[Home]</a>

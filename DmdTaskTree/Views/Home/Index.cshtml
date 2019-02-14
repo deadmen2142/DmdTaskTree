@@ -1,0 +1,68 @@
+﻿@model TaskListModelPreview
+@{
+    ViewBag.Title = "TaskTree";
+}
+
+<aside class="left">
+    <form action="~/Home/Create" method="get">
+        <input type="submit" value="[Add]" class="button addbutton" />
+    </form>
+
+
+    @if (Model.Tasks.Any())
+    {
+        <ul style="padding-left:0">
+            @foreach (var task in Model.Tasks)
+            {
+                <li class="line">
+                    <span>
+                        <button class="tasknote" value="@task.Id" onclick="show('@task.Id')">@task.Id: @task.Name</button>
+                    </span>
+
+                    @if (task.Status != Statuses.Done)
+                    {
+                        <span><a href="~/Home/Create/@task.Id" class="subtask">[A]</a></span>
+                    }
+
+                    <span><a href="~/Home/Update/@task.Id" class="update">[U]</a></span>
+
+                    @if (task.Descendats == null)
+                    {
+                        <span><a href="~/Home/Remove/@task.Id" class="remove">[R]</a></span>
+                    }
+                    else
+                    {
+                        @await Html.PartialAsync("_TreeList", task);
+                    }
+                </li>
+            }
+        </ul>
+    }
+    else
+    {
+        <p class="text">
+            Any tasks not found
+        </p>
+    }
+</aside>
+
+<aside class="right">
+    <div class="description">
+        <span class="text">[Description]</span>
+    </div>
+</aside>
+
+<script>
+    function show(id) {
+        $.get({
+            url: "/Home/GetTask/" + id,
+            success: function (data) {
+                var element = "<div class='description'><p class='text'>[Description]</p>{body}</div>";
+
+                $(".description").empty();
+                $(".description").replaceWith(element.replace("{body}", data));
+            },
+            dataType: "html"
+        });
+    }
+</script>
