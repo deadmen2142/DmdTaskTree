@@ -15,6 +15,6 @@ namespace DmdTaskTree.Models
         public int Id { get; private set; }
         public string Name { get; private set; }
         public Statuses Status { get; private set; }
-        public TaskModelPreview[] Descendats { get; set; }
+        public TaskModelPreview[] Descendants { get; set; }
     }
 }

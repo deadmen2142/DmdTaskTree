@@ -32,18 +32,18 @@ namespace DmdTaskTree.Controllers
 
             TaskModelPreview[] roots = model.Tasks;
             for (int i = 0; i < roots.Length; i++)
-                LoadDescendats(ref roots[i]);
+                LoadDescendants(ref roots[i]);
 
             return View(model);
         }
 
-        private void LoadDescendats(ref TaskModelPreview task)
+        private void LoadDescendants(ref TaskModelPreview task)
         {
-            if (!manager.HasDescendats(task.Id)) return;
+            if (!manager.HasDescendants(task.Id)) return;
 
-            task.Descendats = manager.GetDescendats(task.Id).Select(t => new TaskModelPreview(t)).ToArray();
-            for (int i = 0; i < task.Descendats.Length; i++)
-                LoadDescendats(ref task.Descendats[i]);
+            task.Descendants = manager.GetDescendants(task.Id).Select(t => new TaskModelPreview(t)).ToArray();
+            for (int i = 0; i < task.Descendants.Length; i++)
+                LoadDescendants(ref task.Descendants[i]);
         }
 
         [HttpGet]

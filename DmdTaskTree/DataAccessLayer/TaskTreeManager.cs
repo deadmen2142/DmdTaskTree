@@ -73,7 +73,7 @@ namespace DmdTaskTree.DataAccessLayer
             }
         }
 
-        public bool HasDescendats(int id)
+        public bool HasDescendants(int id)
         {
             using (TaskContext db = new TaskContext(options))
             {
@@ -84,7 +84,7 @@ namespace DmdTaskTree.DataAccessLayer
             }
         }
 
-        public List<TaskNote> GetDescendats(int id)
+        public List<TaskNote> GetDescendants(int id)
         {
             using (TaskContext db = new TaskContext(options))
             {

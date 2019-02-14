@@ -85,7 +85,7 @@ namespace DmdTaskTree.Models
                 if (task == null) throw new NotFoundException("Task is not found in database", id);
 
                 if (db.TaskTreeNodes.Where(note => note.AncestorId == id).FirstOrDefault() != null)
-                    throw new NonTerminalException("Task is not terminal node", id);
+                    throw new NonTerminalException("You can not remove non-terminal task", id);
 
                 TaskNote ancestor = db.TaskTreeNodes.Include(t => t.Ancestor).Where(t => t.DescendantId == id).SingleOrDefault()?.Ancestor;
                 if (ancestor != null)
@@ -108,7 +108,7 @@ namespace DmdTaskTree.Models
                 if (curTask == null) throw new NotFoundException("Task is not found in database", newTask.Id);
 
                 Commands command = ValidateStatusChange(curTask.Status, newTask.Status);
-                ManageExecutionTime(newTask, command);
+                ActionOnStatusChange(newTask, command);
 
                 // Update calculated field
                 newTask.CalculatedPlanedExecutionTime = curTask.CalculatedPlanedExecutionTime - curTask.PlanedExecutionTime + newTask.PlanedExecutionTime;
@@ -120,24 +120,17 @@ namespace DmdTaskTree.Models
                     CalculatePlanedExecutionTimeForAncestor(ancestor, newTask.CalculatedPlanedExecutionTime);
 
                     if (command == Commands.Pause || command == Commands.Clear || command == Commands.Finish)
-                    {
                         CalculateExecutionTimeForAncestor(ancestor, newTask.CalculatedExecutionTime);
-                    }
+
                 }
 
                 // Status logic
                 if (newTask.Status == Statuses.Done)
-                {
-                    DoneStatusUpdateLogic(newTask); // convert into part of DoneStatusUpdateLogic content
-                }
+                    DoneStatusUpdateLogic(newTask);
                 else
-                {
                     _Update(newTask);
-                }
             }
         }
-
-
 
         private void CalculatePlanedExecutionTimeForAncestor(TaskNote taskNote, long collected)
         {
@@ -169,7 +162,7 @@ namespace DmdTaskTree.Models
 
         private void DoneStatusUpdateLogic(TaskNote newTask)
         {
-            List<TaskNote> subtasks = GetDescendats(newTask.Id);
+            List<TaskNote> subtasks = GetDescendants(newTask.Id);
             foreach (TaskNote subtask in subtasks)
             {
                 UpdateSubtaskStatus(subtask, Statuses.Done);
@@ -181,11 +174,15 @@ namespace DmdTaskTree.Models
         private void UpdateSubtaskStatus(TaskNote task, Statuses newStatus)
         {
             if (task.Status == newStatus) return;
-            ValidateStatusChange(task.Status, newStatus);
 
-            List<TaskNote> subtasks = GetDescendats(task.Id);
+            var command = ValidateStatusChange(task.Status, newStatus);
+            ActionOnStatusChange(task, command);
+
+            List<TaskNote> subtasks = GetDescendants(task.Id);
             foreach (TaskNote subtask in subtasks)
+            {
                 UpdateSubtaskStatus(subtask, newStatus);
+            }
 
             task.Status = newStatus;
             _Update(task);
@@ -210,14 +207,16 @@ namespace DmdTaskTree.Models
             if (curValue == Statuses.InProgress && newValue == Statuses.Done) return Commands.Finish;
             if (curValue == Statuses.InProgress && newValue == Statuses.Pause) return Commands.Pause;
             if (curValue == Statuses.Pause && newValue == Statuses.InProgress) return Commands.Resume;
-            if (curValue == Statuses.InProgress && newValue == Statuses.ToDo) return Commands.Clear;
             if (curValue == Statuses.ToDo && newValue == Statuses.InProgress) return Commands.Start;
             if (curValue == Statuses.Done && newValue == Statuses.ToDo) return Commands.Clear;
+            if (curValue == Statuses.Done && newValue == Statuses.ToDo) return Commands.Clear;
+            if (curValue == Statuses.InProgress && newValue == Statuses.ToDo) return Commands.Clear;
+            if (curValue == Statuses.Pause && newValue == Statuses.ToDo) return Commands.Clear;
 
             throw new StatusException("Cannot change from " + curValue.ToString() + " to " + newValue);
         }
 
-        private void ManageExecutionTime(TaskNote task, Commands command)
+        private void ActionOnStatusChange(TaskNote task, Commands command)
         {
             if (command == Commands.Nothing) return;
 

@@ -1,9 +1,9 @@
 ﻿@model TaskModelPreview
 
-@if (Model.Descendats != null)
+@if (Model.Descendants != null)
 {
     <ul>
-        @foreach (var task in Model.Descendats)
+        @foreach (var task in Model.Descendants)
         {
         <li>
             <span>
@@ -15,7 +15,7 @@
             }
             <span><a href="~/Home/Update/@task.Id" class="update">[U]</a></span>
 
-            @if (task.Descendats == null)
+            @if (task.Descendants == null)
             {
                 <span><a href="~/Home/Remove/@task.Id" class="remove">[R]</a></span>
             }

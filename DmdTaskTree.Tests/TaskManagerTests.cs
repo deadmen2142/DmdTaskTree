@@ -61,9 +61,8 @@ namespace DmdTaskTree.Tests
             manager.Update(task);
             task.Status = Statuses.Pause;
             manager.Update(task);
-
             task.Status = Statuses.ToDo;
-            Assert.Throws<StatusException>(() => manager.Update(task));
+            manager.Update(task);
 
             task.Status = Statuses.Done;
             Assert.Throws<StatusException>(() => manager.Update(task));
@@ -78,7 +77,7 @@ namespace DmdTaskTree.Tests
         }
 
         [Fact]
-        public void Update_AncestorMustBeDoneOnlyAfterDescendatsWillBeDone()
+        public void Update_AncestorMustBeDoneOnlyAfterDescendantsWillBeDone()
         {
             TestHelper.ClearDatabase(options);
             TaskManager manager = new TaskManager(options);
@@ -123,7 +122,7 @@ namespace DmdTaskTree.Tests
             tasks[0] = manager.Find(tasks[0].Id);
             Assert.True(tasks[0].Status == Statuses.InProgress);
 
-            // Descendats statuses remained the same
+            // Descendants statuses haven't changed
             Assert.True(tasks[1].Status == Statuses.InProgress);
             Assert.True(tasks[2].Status == Statuses.ToDo);
             Assert.True(tasks[3].Status == Statuses.Done);
@@ -141,6 +140,7 @@ namespace DmdTaskTree.Tests
             {
                 tasks[i] = manager.Find(tasks[i].Id);
                 Assert.Equal(Statuses.Done, tasks[i].Status);
+                Assert.Equal(DateTime.Now.Date, tasks[i].FinishDate.Date);
             }
             Assert.Equal(Statuses.ToDo, tasks[4].Status);
         }
@@ -243,7 +243,7 @@ namespace DmdTaskTree.Tests
                 manager.Remove(tasks[i].Id);
 
                 Assert.Null(manager.Find(tasks[i].Id));
-                Assert.Empty(manager.GetDescendats(tasks[i - 1].Id));
+                Assert.Empty(manager.GetDescendants(tasks[i - 1].Id));
             }
 
             manager.Remove(tasks[0].Id);

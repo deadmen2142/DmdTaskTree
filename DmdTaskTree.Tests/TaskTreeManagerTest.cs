@@ -85,7 +85,7 @@ namespace DmdTaskTree.Tests
             manager.Remove(tasks[1].Id);
 
             Assert.Null(manager.Find(tasks[1].Id));
-            Assert.Empty(manager.GetDescendats(tasks[0].Id));
+            Assert.Empty(manager.GetDescendants(tasks[0].Id));
         }
 
         [Fact]
@@ -132,7 +132,7 @@ namespace DmdTaskTree.Tests
         }
 
         [Fact]
-        public void GetDescendats_Test()
+        public void GetDescendants_Test()
         {
             TestHelper.ClearDatabase(options);
 
@@ -142,16 +142,16 @@ namespace DmdTaskTree.Tests
             manager.Add(tasks[0]);
             manager.Add(tasks[1], tasks[0]);
             manager.Add(tasks[2], tasks[0]);
-            List<TaskNote> descendats = manager.GetDescendats(tasks[0].Id);
+            List<TaskNote> Descendants = manager.GetDescendants(tasks[0].Id);
 
-            Assert.Equal(2, descendats.Count);
-            Assert.Single(descendats.Where(d => d.Id == tasks[1].Id));
-            Assert.Single(descendats.Where(d => d.Id == tasks[2].Id));
-            Assert.Empty(manager.GetDescendats(tasks[1].Id));
+            Assert.Equal(2, Descendants.Count);
+            Assert.Single(Descendants.Where(d => d.Id == tasks[1].Id));
+            Assert.Single(Descendants.Where(d => d.Id == tasks[2].Id));
+            Assert.Empty(manager.GetDescendants(tasks[1].Id));
         }
 
         [Fact]
-        public void HasDescendats_Test()
+        public void HasDescendants_Test()
         {
             TestHelper.ClearDatabase(options);
             TaskNote[] tasks = { new TaskNote { Name = "1t" }, new TaskNote { Name = "2t" } };
@@ -160,8 +160,8 @@ namespace DmdTaskTree.Tests
             manager.Add(tasks[0]);
             manager.Add(tasks[1], tasks[0]);
 
-            Assert.True(manager.HasDescendats(tasks[0].Id));
-            Assert.False(manager.HasDescendats(tasks[1].Id));
+            Assert.True(manager.HasDescendants(tasks[0].Id));
+            Assert.False(manager.HasDescendants(tasks[1].Id));
         }
 
         [Fact]
@@ -193,13 +193,13 @@ namespace DmdTaskTree.Tests
             manager.Add(tasks[1], tasks[0]);
             manager.Add(tasks[2], tasks[0]);
 
-            var descendats = manager.GetDescendats(tasks[0].Id);
+            var Descendants = manager.GetDescendants(tasks[0].Id);
             Action act = () => manager.Add(null);
 
             Assert.Equal(tasks[0].Id, manager.GetAncestor(tasks[1].Id).Id);
             Assert.Equal(tasks[0].Id, manager.GetAncestor(tasks[2].Id).Id);
-            Assert.Single(descendats.Where(t => t.Id == tasks[1].Id));
-            Assert.Single(descendats.Where(t => t.Id == tasks[2].Id));
+            Assert.Single(Descendants.Where(t => t.Id == tasks[1].Id));
+            Assert.Single(Descendants.Where(t => t.Id == tasks[2].Id));
             Assert.Throws<NullReferenceException>(act);
         }
 
