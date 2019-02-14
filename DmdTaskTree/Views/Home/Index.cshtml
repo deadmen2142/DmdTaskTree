@@ -57,7 +57,7 @@
         $.get({
             url: "/Home/GetTask/" + id,
             success: function (data) {
-                var element = "<div class='description'><p class='text'>[Description]</p>{body}</div>";
+                var element = "<div class='description'><span class='text'>[Description]</span>{body}</div>";
 
                 $(".description").empty();
                 $(".description").replaceWith(element.replace("{body}", data));
