@@ -395,6 +395,43 @@ namespace DmdTaskTree.Tests
         }
 
         [Fact]
+        public void Update_RecomputeExecutionTImeTest()
+        {
+            TestHelper.ClearDatabase(options);
+            TaskManager manager = new TaskManager(options);
+
+            TaskNote[] tasks = new TaskNote[2];
+            for (int i = 0; i < tasks.Length; i++)
+                tasks[i] = new TaskNote();
+
+            manager.Add(tasks[0]);
+            manager.Add(tasks[1], tasks[0]);
+
+            TestHelper.SetStatus(manager, tasks, Statuses.InProgress);
+            Thread.Sleep(1000);
+
+            tasks[0].Status = Statuses.Done;
+            manager.Update(tasks[0]);
+
+            TestHelper.Refresh(manager, tasks);
+
+            Assert.Equal(tasks[1].CalculatedExecutionTime, tasks[1].ExecutionTime);
+            Assert.True(GetSec(1) <= tasks[1].ExecutionTime);
+            Assert.True(GetSec(2) > tasks[1].ExecutionTime);
+
+
+            Assert.Equal(tasks[0].CalculatedExecutionTime - tasks[0].ExecutionTime, tasks[1].CalculatedExecutionTime);
+
+            long time = 0;
+            for (int i = 0; i < tasks.Length; i++)
+                time += tasks[i].ExecutionTime;
+
+            Assert.Equal(time, tasks[0].CalculatedExecutionTime);
+        }
+
+        
+
+        [Fact]
         public void Update_CollectSubtaskExecutionTimeTest()
         {
             TestHelper.ClearDatabase(options);

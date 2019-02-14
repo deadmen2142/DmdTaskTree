@@ -1,4 +1,5 @@
 ﻿using DmdTaskTree.DataAccessLayer;
+using DmdTaskTree.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -25,6 +26,23 @@ namespace DmdTaskTree.Tests
                     db.TaskTreeNodes.Remove(node);
                 }
                 db.SaveChanges();
+            }
+        }
+
+        public static void SetStatus(TaskManager manager, TaskNote[] tasks, Statuses status)
+        {
+            for (int i = 0; i < tasks.Length; i++)
+            {
+                tasks[i].Status = status;
+                manager.Update(tasks[i]);
+            }
+        }
+
+        public static void Refresh(TaskManager manager, TaskNote[] tasks)
+        {
+            for (int i = 0; i < tasks.Length; i++)
+            {
+                tasks[i] = manager.Find(tasks[i].Id);
             }
         }
     }

@@ -104,31 +104,64 @@ namespace DmdTaskTree.Models
         {
             using (TaskContext db = new TaskContext(options))
             {
+                if (db.TaskNotes.Where(t => t.Id == newTask.Id).SingleOrDefault() == null)
+                    throw new NotFoundException("Task is not found in database", newTask.Id);
+
+                UpdateLogic(newTask);
+            }
+        }
+
+        private void UpdateLogic(TaskNote newTask)
+        {
+            using (TaskContext db = new TaskContext(options))
+            {
                 TaskNote curTask = db.TaskNotes.Where(t => t.Id == newTask.Id).SingleOrDefault();
-                if (curTask == null) throw new NotFoundException("Task is not found in database", newTask.Id);
 
                 Commands command = ValidateStatusChange(curTask.Status, newTask.Status);
+                if (command == Commands.Finish)
+                {
+                    List<TaskNote> subtasks = GetDescendants(newTask.Id);
+                    foreach (TaskNote subtask in subtasks)
+                        IsSubtasksCompletable(subtask);
+                }
+
+                // Recalculate values on status change
                 ActionOnStatusChange(newTask, command);
 
-                // Update calculated field
+                // Update calculated fields
                 newTask.CalculatedPlanedExecutionTime = curTask.CalculatedPlanedExecutionTime - curTask.PlanedExecutionTime + newTask.PlanedExecutionTime;
                 newTask.CalculatedExecutionTime = curTask.CalculatedExecutionTime - curTask.ExecutionTime + newTask.ExecutionTime;
 
+                // Apply changes in ancestors
                 TaskNote ancestor = db.TaskTreeNodes.Include(t => t.Ancestor).Where(t => t.DescendantId == newTask.Id).SingleOrDefault()?.Ancestor;
                 if (ancestor != null)
                 {
-                    CalculatePlanedExecutionTimeForAncestor(ancestor, newTask.CalculatedPlanedExecutionTime);
+                    if (newTask.CalculatedPlanedExecutionTime != curTask.CalculatedPlanedExecutionTime)
+                        CalculatePlanedExecutionTimeForAncestor(ancestor, newTask.CalculatedPlanedExecutionTime);
 
-                    if (command == Commands.Pause || command == Commands.Clear || command == Commands.Finish)
+                    if (newTask.CalculatedExecutionTime != curTask.CalculatedExecutionTime)
                         CalculateExecutionTimeForAncestor(ancestor, newTask.CalculatedExecutionTime);
-
                 }
 
-                // Status logic
-                if (newTask.Status == Statuses.Done)
-                    DoneStatusUpdateLogic(newTask);
-                else
-                    _Update(newTask);
+                UpdateDb(newTask);
+
+                // Subtask change status logic
+                if (command == Commands.Finish)
+                {
+                    List<TaskNote> subtasks = GetDescendants(newTask.Id);
+                    foreach (TaskNote subtask in subtasks)
+                        SetSubtaskDoneStatus(subtask);
+                } 
+            }
+        }
+
+        private void UpdateDb(TaskNote task)
+        {
+            using (TaskContext db = new TaskContext(options))
+            {
+                TaskNote curTask = db.TaskNotes.FirstOrDefault(t => t.Id == task.Id);
+                db.Entry(curTask).CurrentValues.SetValues(task);
+                db.SaveChanges();
             }
         }
 
@@ -137,7 +170,7 @@ namespace DmdTaskTree.Models
             using (TaskContext db = new TaskContext(options))
             {
                 taskNote.CalculatedPlanedExecutionTime = collected + taskNote.PlanedExecutionTime;
-                _Update(taskNote);
+                UpdateDb(taskNote);
 
                 TaskNote ancestor = db.TaskTreeNodes.Include(t => t.Ancestor).Where(t => t.DescendantId == taskNote.Id).SingleOrDefault()?.Ancestor;
                 if (ancestor == null) return;
@@ -151,7 +184,7 @@ namespace DmdTaskTree.Models
             using (TaskContext db = new TaskContext(options))
             {
                 taskNote.CalculatedExecutionTime = collected + taskNote.ExecutionTime;
-                _Update(taskNote);
+                UpdateDb(taskNote);
 
                 TaskNote ancestor = db.TaskTreeNodes.Include(t => t.Ancestor).Where(t => t.DescendantId == taskNote.Id).SingleOrDefault()?.Ancestor;
                 if (ancestor == null) return;
@@ -160,43 +193,30 @@ namespace DmdTaskTree.Models
             }
         }
 
-        private void DoneStatusUpdateLogic(TaskNote newTask)
+        private void IsSubtasksCompletable(TaskNote task)
         {
-            List<TaskNote> subtasks = GetDescendants(newTask.Id);
+            List<TaskNote> subtasks = GetDescendants(task.Id);
             foreach (TaskNote subtask in subtasks)
-            {
-                UpdateSubtaskStatus(subtask, Statuses.Done);
-            }
-
-            _Update(newTask);
+                IsSubtasksCompletable(subtask);
+            ValidateStatusChange(task.Status, Statuses.Done);
         }
+        
 
-        private void UpdateSubtaskStatus(TaskNote task, Statuses newStatus)
+        private void SetSubtaskDoneStatus(TaskNote task)
         {
-            if (task.Status == newStatus) return;
-
-            var command = ValidateStatusChange(task.Status, newStatus);
-            ActionOnStatusChange(task, command);
+            if (task.Status == Statuses.Done) return;
 
             List<TaskNote> subtasks = GetDescendants(task.Id);
             foreach (TaskNote subtask in subtasks)
             {
-                UpdateSubtaskStatus(subtask, newStatus);
+                SetSubtaskDoneStatus(subtask);
             }
 
-            task.Status = newStatus;
-            _Update(task);
+            task.Status = Statuses.Done;
+            UpdateLogic(task);
         }
 
-        private void _Update(TaskNote task)
-        {
-            using (TaskContext db = new TaskContext(options))
-            {
-                TaskNote curTask = db.TaskNotes.FirstOrDefault(t => t.Id == task.Id);
-                db.Entry(curTask).CurrentValues.SetValues(task);
-                db.SaveChanges();
-            }
-        }
+        
 
         private enum Commands { Start = 0, Pause, Resume, Finish, Clear, Nothing }
 
