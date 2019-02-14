@@ -31,7 +31,7 @@
             <td class="text">Status:</td>
             <td>
                 <select name="Status" required>
-                    <option value="@Model.Status.ToString()" selected>"@Model.Status.ToString()"</option>
+                    <option value="@Model.Status.ToString()" selected>@Model.Status.ToString()</option>
                     @if (Model.Status == Statuses.ToDo)
                     {
                         <option value="InProgress">InProgress</option>
@@ -49,7 +49,6 @@
                     @if (Model.Status == Statuses.Done)
                     {
                         <option value="ToDo">ToDo</option>
-                        <option value="InProgress">InProgress</option>
                     }
                 </select>
             </td>

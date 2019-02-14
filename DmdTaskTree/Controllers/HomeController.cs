@@ -30,14 +30,14 @@ namespace DmdTaskTree.Controllers
                 Tasks = manager.GetRoots().Select(t => new TaskModelPreview(t)).ToArray()
             };
 
-            var roots = model.Tasks;
+            TaskModelPreview[] roots = model.Tasks;
             for (int i = 0; i < roots.Length; i++)
                 LoadDescendats(ref roots[i]);
 
             return View(model);
         }
 
-        public void LoadDescendats(ref TaskModelPreview task)
+        private void LoadDescendats(ref TaskModelPreview task)
         {
             if (!manager.HasDescendats(task.Id)) return;
 
@@ -56,10 +56,9 @@ namespace DmdTaskTree.Controllers
         [HttpPost]
         public IActionResult Create(TaskModel model)
         {
-            //Request.Form.FirstOrDefault(p => p.Key == "PlanedFinishDate");
             try
             {
-                var task = new TaskNote
+                TaskNote task = new TaskNote
                 {
                     Name = model.Name,
                     Description = model.Description,
@@ -68,13 +67,9 @@ namespace DmdTaskTree.Controllers
                 };
 
                 if (model.AncestorId != default(int))
-                {
                     manager.Add(task, model.AncestorId);
-                }
                 else
-                {
                     manager.Add(task);
-                }
             }
             catch (InvalidOperationException ex)
             {

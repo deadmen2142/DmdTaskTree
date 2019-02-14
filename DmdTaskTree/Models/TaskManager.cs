@@ -10,13 +10,32 @@ namespace DmdTaskTree.Models
     {
         public TaskManager(DbContextOptions<TaskContext> options) : base(options) { }
 
+
         public override void Add(TaskNote task, TaskNote ancestor = null)
         {
-            int ancestorId = ancestor == null ? default(int) : ancestor.Id;
-            Add(task, ancestorId);
+            Add(task: task, ancestorId: ancestor == null ? default(int) : ancestor.Id);
         }
 
         public void Add(TaskNote task, int ancestorId)
+        {
+            using (TaskContext db = new TaskContext(options))
+            {
+                ValidateTaskOnAdding(task);
+                TaskNote ancestor = ValidateAncestor(ancestorId);
+
+                OnAdd(task);
+                db.TaskNotes.Add(task);
+                db.SaveChanges();
+
+                if (ancestor != null)
+                {
+                    ConnectDescendatToAncestor(task.Id, ancestor);
+                    CalculatePlanedExecutionTimeForAncestor(ancestor, task.CalculatedPlanedExecutionTime);
+                }
+            }
+        }
+
+        private void ValidateTaskOnAdding(TaskNote task)
         {
             using (TaskContext db = new TaskContext(options))
             {
@@ -25,29 +44,22 @@ namespace DmdTaskTree.Models
 
                 if (task.Status != Statuses.ToDo)
                     throw new StatusException("Cannot add task with status different from ToDo (Actual: " + task.Status.ToString() + ")");
-
-                TaskNote ancestor = null;
-
-                if (ancestorId != default(int))
-                {
-                    if ((ancestor = db.TaskNotes.Find(ancestorId)) == null)
-                        throw new NotFoundException("Parent is not found in database", ancestorId);
-                    if (ancestor.Status == Statuses.Done)
-                        throw new StatusException("Cannot add subtask to task with status Done");
-                }
-
-
-                OnAdd(task);
-                db.TaskNotes.Add(task);
-                db.SaveChanges();
-
-                if (ancestorId != default(int))
-                {
-                    ConnectDescendatToAncestor(task.Id, ancestor);
-                    CalculatePlanedExecutionTimeForAncestor(ancestor, task.CalculatedPlanedExecutionTime);
-                }
             }
+        }
 
+        private TaskNote ValidateAncestor(int ancestorId)
+        {
+            using (TaskContext db = new TaskContext(options))
+            {
+                TaskNote ancestor = null;
+                if (ancestorId == default(int)) return ancestor;
+
+                if ((ancestor = db.TaskNotes.Find(ancestorId)) == null)
+                    throw new NotFoundException("Parent is not found in database", ancestorId);
+                if (ancestor.Status == Statuses.Done)
+                    throw new StatusException("Cannot add subtask to task with status Done");
+                return ancestor;
+            }
         }
 
         private void OnAdd(TaskNote task)
