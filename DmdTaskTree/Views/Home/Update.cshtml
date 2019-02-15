@@ -31,9 +31,9 @@
             <td><input type="datetime-local" name="PlanedFinishDate" value="@finishDate" required /></td>
         </tr>
         <tr>
-            <td class="text">Status:</td>
+            <td class="text">@Localizer["Status"]:</td>
             <td>
-                <select name="@Localizer["Status"]" required>
+                <select name="Status" required>
                     <option value="@Model.Status.ToString()" selected>@Model.Status.ToString()</option>
                     @if (Model.Status == Statuses.ToDo)
                     {
