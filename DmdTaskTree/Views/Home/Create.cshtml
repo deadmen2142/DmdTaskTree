@@ -1,27 +1,30 @@
-﻿
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+
 @{
     ViewBag.Title = "Create";
 }
-<p class="text">Fill the form to create new task</p>
+
+<p class="text">@Localizer["Title"]</p>
 <form name="createForm" method="post" action="~/Home/Create" class="text">
     <input type="hidden" value="@ViewBag.AncestorId" name="AncestorId" />
     <table>
         <tr>
-            <td>Task name:</td>
-            <td><input type="text" name="Name" required/> </td>
+            <td>@Localizer["Name"]</td>
+            <td><input type="text" name="Name" required /> </td>
         </tr>
         <tr>
-            <td>Description:</td>
+            <td>@Localizer["Description"]</td>
             <td><input type="text" name="Description" /></td>
         </tr>
         <tr>
-            <td>Performers:</td>
+            <td>@Localizer["Performers"]</td>
             <td><input type="text" name="Performers" /></td>
         </tr>
         <tr>
-            <td>Planed finish date:</td>
+            <td>@Localizer["PlanedFinishDate"]</td>
             <td><input type="datetime-local" name="PlanedFinishDate" required /></td>
         </tr>
-        <tr><td><input type="submit" value="[Submit]" class="button addbutton" /> </td><td></td></tr>
+        <tr><td><input type="submit" value="@Localizer["Sumbit"]" class="button addbutton" /> </td><td></td></tr>
     </table>
 </form>

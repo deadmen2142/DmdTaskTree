@@ -8,13 +8,13 @@ using DmdTaskTree.Models;
 using Microsoft.EntityFrameworkCore;
 using DmdTaskTree.DataAccessLayer;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Localization;
 
 namespace DmdTaskTree.Controllers
 {
     public class HomeController : Controller
     {
         private TaskManager manager;
-
 
         public HomeController()
         {

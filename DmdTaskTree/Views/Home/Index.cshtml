@@ -1,11 +1,14 @@
-﻿@model TaskListModelPreview
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+
+@model TaskListModelPreview
 @{
     ViewBag.Title = "TaskTree";
 }
 
 <aside class="left">
     <form action="~/Home/Create" method="get">
-        <input type="submit" value="[Add]" class="button addbutton" />
+        <input type="submit" value="@Localizer["AddButton"]" class="button addbutton" />
     </form>
 
 
@@ -41,14 +44,14 @@
     else
     {
         <p class="text">
-            Any tasks not found
+            @Localizer["NotFound"]
         </p>
     }
 </aside>
 
 <aside class="right">
     <div class="description">
-        <span class="text">[Description]</span>
+        <span class="text">@Localizer["Description"]</span>
     </div>
 </aside>
 
@@ -57,7 +60,7 @@
         $.get({
             url: "/Home/GetTask/" + id,
             success: function (data) {
-                var element = "<div class='description'><span class='text'>[Description]</span>{body}</div>";
+                var element = "<div class='description'><span class='text'>@Localizer["DescriptionTitle"]</span>{body}</div>";
 
                 $(".description").empty();
                 $(".description").replaceWith(element.replace("{body}", data));

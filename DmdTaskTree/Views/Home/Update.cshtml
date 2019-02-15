@@ -1,36 +1,39 @@
-﻿@model TaskNote
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+
+@model TaskNote
 
 @{
     ViewData["Title"] = "Update";
 }
 
-<p class="text">Fill the form to update the task</p>
+<p class="text">@Localizer["Title"]</p>
 <form name="updateForm" method="post" action="~/Home/Update">
-    <input type="hidden" name="Id" value="@Model.Id"/>
+    <input type="hidden" name="Id" value="@Model.Id" />
     <table>
         <tr>
-            <td class="text">Task name:</td>
+            <td class="text">@Localizer["Name"]</td>
             <td><input type="text" name="Name" value="@Model.Name" required /> </td>
         </tr>
         <tr>
-            <td class="text">Description:</td>
+            <td class="text">@Localizer["Description"]</td>
             <td><input type="text" name="Description" value="@Model.Description" /></td>
         </tr>
         <tr>
-            <td class="text">Performers:</td>
+            <td class="text">@Localizer["Performers"]</td>
             <td><input type="text" name="Performers" value="@Model.Performers" /></td>
         </tr>
         <tr>
-            @{ 
+            @{
                 var finishDate = (Model.CreationDate + TimeSpan.FromTicks(Model.PlanedExecutionTime)).ToString("yyyy-MM-dd HH:mm:ss").Replace(' ', 'T');
             }
-            <td class="text">Planed finish date:</td>
+            <td class="text">@Localizer["PlanedFinishDate"]</td>
             <td><input type="datetime-local" name="PlanedFinishDate" value="@finishDate" required /></td>
         </tr>
         <tr>
             <td class="text">Status:</td>
             <td>
-                <select name="Status" required>
+                <select name="@Localizer["Status"]" required>
                     <option value="@Model.Status.ToString()" selected>@Model.Status.ToString()</option>
                     @if (Model.Status == Statuses.ToDo)
                     {
@@ -53,7 +56,7 @@
                 </select>
             </td>
         </tr>
-        <tr><td><input type="submit" value="[Submit]" class="button addbutton"/> </td><td></td></tr>
+        <tr><td><input type="submit" value="@Localizer["Sumbit"]" class="button addbutton" /> </td><td></td></tr>
     </table>
 </form>
 

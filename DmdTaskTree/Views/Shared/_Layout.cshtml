@@ -1,4 +1,7 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8" />
@@ -12,7 +15,7 @@
 </head>
 <body>
     <header>
-        <div class="position"><a href="~/Home/Index" class="button addbutton">Task manager "Task tree"</a></div>
+        <div class="position"><a href="~/Home/Index" class="button addbutton">@Localizer["Title"]</a></div>
         <hr />
     </header>
     <div class="position">
