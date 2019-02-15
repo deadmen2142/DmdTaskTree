@@ -30,7 +30,7 @@ namespace DmdTaskTree.Models
                 if (ancestor != null)
                 {
                     ConnectDescendatToAncestor(task.Id, ancestor);
-                    CalculatePlanedExecutionTimeForAncestor(ancestor, task.CalculatedPlanedExecutionTime);
+                    CalculatePlanedExecutionTimeForAncestor(ancestor, task.CalculatedPlanedExecutionTime, 0);
                 }
             }
         }
@@ -90,8 +90,9 @@ namespace DmdTaskTree.Models
                 TaskNote ancestor = db.TaskTreeNodes.Include(t => t.Ancestor).Where(t => t.DescendantId == id).SingleOrDefault()?.Ancestor;
                 if (ancestor != null)
                 {
-                    CalculatePlanedExecutionTimeForAncestor(ancestor, default(TimeSpan).Ticks);
-                    CalculateExecutionTimeForAncestor(ancestor, default(TimeSpan).Ticks);
+                    CalculateExecutionTimeForAncestor(ancestor, 0, task.CalculatedExecutionTime);
+                    CalculatePlanedExecutionTimeForAncestor(ancestor, 0, task.CalculatedPlanedExecutionTime);
+
                     db.TaskTreeNodes.Remove(task.TaskTreeNode);
                 }
 
@@ -137,10 +138,10 @@ namespace DmdTaskTree.Models
                 if (ancestor != null)
                 {
                     if (newTask.CalculatedPlanedExecutionTime != curTask.CalculatedPlanedExecutionTime)
-                        CalculatePlanedExecutionTimeForAncestor(ancestor, newTask.CalculatedPlanedExecutionTime);
+                        CalculatePlanedExecutionTimeForAncestor(ancestor, newTask.CalculatedPlanedExecutionTime, curTask.CalculatedPlanedExecutionTime);
 
                     if (newTask.CalculatedExecutionTime != curTask.CalculatedExecutionTime)
-                        CalculateExecutionTimeForAncestor(ancestor, newTask.CalculatedExecutionTime);
+                        CalculateExecutionTimeForAncestor(ancestor, newTask.CalculatedExecutionTime, curTask.CalculatedExecutionTime);
                 }
 
                 UpdateDb(newTask);
@@ -165,31 +166,33 @@ namespace DmdTaskTree.Models
             }
         }
 
-        private void CalculatePlanedExecutionTimeForAncestor(TaskNote taskNote, long collected)
+        private void CalculatePlanedExecutionTimeForAncestor(TaskNote taskNote, long newCollected, long oldCollected)
         {
             using (TaskContext db = new TaskContext(options))
             {
-                taskNote.CalculatedPlanedExecutionTime = collected + taskNote.PlanedExecutionTime;
+                taskNote.CalculatedPlanedExecutionTime += newCollected - oldCollected;
+                var old = db.TaskNotes.Find(taskNote.Id).CalculatedPlanedExecutionTime;
                 UpdateDb(taskNote);
 
                 TaskNote ancestor = db.TaskTreeNodes.Include(t => t.Ancestor).Where(t => t.DescendantId == taskNote.Id).SingleOrDefault()?.Ancestor;
                 if (ancestor == null) return;
 
-                CalculatePlanedExecutionTimeForAncestor(ancestor, taskNote.CalculatedPlanedExecutionTime);
+                CalculatePlanedExecutionTimeForAncestor(ancestor, taskNote.CalculatedPlanedExecutionTime, old);
             }
         }
 
-        private void CalculateExecutionTimeForAncestor(TaskNote taskNote, long collected)
+        private void CalculateExecutionTimeForAncestor(TaskNote taskNote, long newCollected, long oldCollected)
         {
             using (TaskContext db = new TaskContext(options))
             {
-                taskNote.CalculatedExecutionTime = collected + taskNote.ExecutionTime;
+                taskNote.CalculatedExecutionTime += newCollected - oldCollected;
+                var old = db.TaskNotes.Find(taskNote.Id).CalculatedExecutionTime;
                 UpdateDb(taskNote);
 
                 TaskNote ancestor = db.TaskTreeNodes.Include(t => t.Ancestor).Where(t => t.DescendantId == taskNote.Id).SingleOrDefault()?.Ancestor;
                 if (ancestor == null) return;
 
-                CalculateExecutionTimeForAncestor(ancestor, taskNote.CalculatedExecutionTime);
+                CalculateExecutionTimeForAncestor(ancestor, taskNote.CalculatedExecutionTime, old);
             }
         }
 

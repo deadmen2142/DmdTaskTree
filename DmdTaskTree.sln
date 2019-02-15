@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.28307.329
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DmdTaskTree", "DmdTaskTree\DmdTaskTree.csproj", "{5249CAA2-716C-4E29-B21C-2C14F5E72CDE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DmdTaskTree.Tests", "DmdTaskTree.Tests\DmdTaskTree.Tests.csproj", "{20EB9902-E084-48AD-8AA7-CCF23194347B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DmdTaskTree.Tests", "DmdTaskTree.Tests\DmdTaskTree.Tests.csproj", "{20EB9902-E084-48AD-8AA7-CCF23194347B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

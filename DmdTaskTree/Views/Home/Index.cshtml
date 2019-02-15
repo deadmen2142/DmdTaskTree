@@ -60,7 +60,7 @@
         $.get({
             url: "/Home/GetTask/" + id,
             success: function (data) {
-                var element = "<div class='description'><span class='text'>@Localizer["DescriptionTitle"]</span>{body}</div>";
+                var element = "<div class='description'><span class='text'>@Localizer["Description"]</span>{body}</div>";
 
                 $(".description").empty();
                 $(".description").replaceWith(element.replace("{body}", data));
