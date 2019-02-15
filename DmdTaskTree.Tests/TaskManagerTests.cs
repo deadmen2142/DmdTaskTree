@@ -400,7 +400,7 @@ namespace DmdTaskTree.Tests
             TestHelper.ClearDatabase(options);
             TaskManager manager = new TaskManager(options);
 
-            TaskNote[] tasks = new TaskNote[4];
+            TaskNote[] tasks = new TaskNote[6];
             for (int i = 0; i < tasks.Length; i++)
                 tasks[i] = new TaskNote();
 
@@ -408,6 +408,8 @@ namespace DmdTaskTree.Tests
             manager.Add(tasks[1], tasks[0]);
             manager.Add(tasks[2], tasks[0]);
             manager.Add(tasks[3], tasks[1]);
+            manager.Add(tasks[4], tasks[1]);
+            manager.Add(tasks[5], tasks[0]);
 
             TestHelper.SetStatus(manager, tasks, Statuses.InProgress);
             Thread.Sleep(1000);
@@ -429,13 +431,13 @@ namespace DmdTaskTree.Tests
             TestHelper.Refresh(manager, tasks);
 
             Assert.Equal(tasks[3].CalculatedExecutionTime, tasks[3].ExecutionTime);
+            Assert.Equal(tasks[4].CalculatedExecutionTime, tasks[4].ExecutionTime);
+            Assert.Equal(tasks[5].CalculatedExecutionTime, tasks[5].ExecutionTime);
             Assert.Equal(tasks[2].CalculatedExecutionTime, tasks[2].ExecutionTime);
 
-            Assert.Equal(tasks[1].CalculatedExecutionTime, tasks[1].ExecutionTime + tasks[3].CalculatedExecutionTime);
-            Assert.Equal(tasks[0].CalculatedExecutionTime, tasks[1].CalculatedExecutionTime + tasks[2].CalculatedExecutionTime + tasks[0].ExecutionTime);
+            Assert.Equal(tasks[1].CalculatedExecutionTime, tasks[1].ExecutionTime + tasks[3].CalculatedExecutionTime + tasks[4].CalculatedExecutionTime);
+            Assert.Equal(tasks[0].CalculatedExecutionTime, tasks[5].CalculatedExecutionTime + tasks[1].CalculatedExecutionTime + tasks[2].CalculatedExecutionTime + tasks[0].ExecutionTime);
         }
-
-        
 
         [Fact]
         public void Update_CollectSubtaskExecutionTimeTest()
